@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  # 🔹 SQL Server
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver2022
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Spectrum2@
+    ports:
+      - "1433:1433"   # Only if you want to connect from host (SSMS, Azure Data Studio)
+    networks:
+      - dockernet
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  # 🔹 Web API
+  webapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: webapi
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=WebAPIDB;User Id=sa;Password=Spectrum2@;TrustServerCertificate=True;
+    ports:
+      - "8080:80"   # HTTP
+      - "8081:443"  # HTTPS
+    networks:
+      - dockernet
+
+networks:
+  dockernet:
+
+volumes:
+  sql_data:
