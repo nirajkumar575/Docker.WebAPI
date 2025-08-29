@@ -16,6 +16,15 @@ namespace Docker.WebAPI.Controllers
         {
             _context = context;
         }
+        [HttpGet("csv")]
+        public async Task<IActionResult> GetEmployeesCsv()
+        {
+            var employees = await _context.Employees.ToListAsync();
+            var csv = "Id,Name,Position,Salary\n" +
+                      string.Join("\n", employees.Select(e => $"{e.Id},{e.Name},{e.Position},{e.Salary}"));
+            return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", "employees.csv");
+        }
+
 
         // GET: api/employee
         [HttpGet]
